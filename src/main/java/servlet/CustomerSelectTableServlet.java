@@ -25,20 +25,29 @@ public class CustomerSelectTableServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Kiểm tra đăng nhập
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("username") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        // Lấy thông tin user từ database
-        String username = (String) session.getAttribute("username");
-        User user = userDAO.findByUsername(username);
+        // Kiểm tra xem có phải khách vãng lai không
+        String isGuest = request.getParameter("guest");
+        boolean guestMode = "true".equals(isGuest);
         
-        // Truyền thông tin user vào request để JSP sử dụng
-        if (user != null) {
-            request.setAttribute("user", user);
+        HttpSession session = request.getSession(false);
+        
+        if (!guestMode) {
+            // Mode customer - cần đăng nhập
+            if (session == null || session.getAttribute("username") == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+
+            // Lấy thông tin user từ database
+            String username = (String) session.getAttribute("username");
+            User user = userDAO.findByUsername(username);
+            
+            if (user != null) {
+                request.setAttribute("user", user);
+            }
+        } else {
+            // Mode guest - không cần đăng nhập
+            request.setAttribute("isGuest", true);
         }
 
         // Hiển thị trang chọn bàn
@@ -48,18 +57,29 @@ public class CustomerSelectTableServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Kiểm tra đăng nhập
+        // Kiểm tra xem có phải khách vãng lai không
+        String isGuest = request.getParameter("guest");
+        boolean guestMode = "true".equals(isGuest);
+        
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("username") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
+        User user = null;
+        
+        if (!guestMode) {
+            // Mode customer - cần đăng nhập
+            if (session == null || session.getAttribute("username") == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
 
-        // Lấy thông tin user
-        String username = (String) session.getAttribute("username");
-        User user = userDAO.findByUsername(username);
-        if (user != null) {
-            request.setAttribute("user", user);
+            // Lấy thông tin user
+            String username = (String) session.getAttribute("username");
+            user = userDAO.findByUsername(username);
+            if (user != null) {
+                request.setAttribute("user", user);
+            }
+        } else {
+            // Mode guest
+            request.setAttribute("isGuest", true);
         }
 
         // Lấy ngày và giờ từ form
@@ -71,7 +91,7 @@ public class CustomerSelectTableServlet extends HttpServlet {
                 Date date = Date.valueOf(dateStr);
                 Time time = Time.valueOf(timeStr + ":00");
 
-                // Lấy TẤT CẢ bàn với trạng thái tại thời điểm đặt (cả trống và đã đặt)
+                // Lấy TẤT CẢ bàn với trạng thái tại thời điểm đặt
                 List<RestaurantTable> tables = tableDAO.findAllTablesByDateTime(date, time);
 
                 // Truyền danh sách bàn và thông tin đã chọn vào request

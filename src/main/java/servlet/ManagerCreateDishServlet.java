@@ -121,9 +121,9 @@ public class ManagerCreateDishServlet extends HttpServlet {
         boolean success = dishDAO.insert(newDish);
 
         if (success) {
-            // Thêm món ăn thành công
-            session.setAttribute("dishSuccess", "Thêm món ăn thành công!");
-            response.sendRedirect(request.getContextPath() + "/manager/dishes");
+            // Thêm món ăn thành công - reset form
+            request.setAttribute("success", "Thêm món ăn \"" + name.trim() + "\" thành công!");
+            request.getRequestDispatcher("/WEB-INF/manager/ICreateNewDish.jsp").forward(request, response);
         } else {
             // Thêm món ăn thất bại
             request.setAttribute("error", "Thêm món ăn thất bại! Vui lòng thử lại.");

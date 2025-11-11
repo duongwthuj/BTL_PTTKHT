@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu Quản lý - Restman</title>
+    <title>Menu Khách hàng - Restman</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
@@ -174,37 +174,37 @@
 
     <div class="menu-container fade-in">
         <div class="welcome-text">
-            <i class="fas fa-user-shield" style="font-size: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
-            <h1>Chào mừng Quản lý, <%= session.getAttribute("username") != null ? session.getAttribute("username") : "Admin" %>!</h1>
-            <p>Vui lòng chọn chức năng bạn muốn quản lý</p>
+            <i class="fas fa-utensils" style="font-size: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+            <h1>Chào mừng, <%= session.getAttribute("username") != null ? session.getAttribute("username") : "Khách hàng" %>!</h1>
+            <p>Vui lòng chọn chức năng bạn muốn sử dụng</p>
         </div>
 
         <div class="module-grid">
-            <!-- Module 1: Thêm món ăn (Active) -->
-            <a href="${pageContext.request.contextPath}/manager/dishes/create" class="module-card active hover-lift">
-                <div class="module-icon">
-                    <i class="fas fa-plus-circle"></i>
-                </div>
-                <div class="module-title">Thêm món ăn mới</div>
-                <div class="module-description">Thêm món ăn vào thực đơn nhà hàng</div>
-            </a>
-
-            <!-- Module 2: Quản lý đặt bàn (Disabled) -->
-            <div class="module-card disabled">
+            <!-- Module 1: Đặt bàn (Active - Chức năng chính) -->
+            <a href="${pageContext.request.contextPath}/customer/reservation/select-table" class="module-card active hover-lift">
                 <div class="module-icon">
                     <i class="fas fa-calendar-check"></i>
                 </div>
-                <div class="module-title">Quản lý đặt bàn</div>
-                <div class="module-description">Xem và quản lý các đơn đặt bàn</div>
-            </div>
+                <div class="module-title">Đặt bàn</div>
+                <div class="module-description">Đặt bàn trước cho bữa ăn của bạn</div>
+            </a>
 
-            <!-- Module 3: Báo cáo thống kê (Disabled) -->
+            <!-- Module 2: Xem thực đơn (Disabled) -->
             <div class="module-card disabled">
                 <div class="module-icon">
-                    <i class="fas fa-chart-bar"></i>
+                    <i class="fas fa-book-open"></i>
                 </div>
-                <div class="module-title">Báo cáo thống kê</div>
-                <div class="module-description">Xem báo cáo doanh thu và thống kê</div>
+                <div class="module-title">Xem thực đơn</div>
+                <div class="module-description">Khám phá các món ăn đặc sắc</div>
+            </div>
+
+            <!-- Module 3: Lịch sử đặt bàn (Disabled) -->
+            <div class="module-card disabled">
+                <div class="module-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="module-title">Lịch sử đặt bàn</div>
+                <div class="module-description">Xem các đơn đặt bàn của bạn</div>
             </div>
         </div>
     </div>

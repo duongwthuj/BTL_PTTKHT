@@ -1,8 +1,5 @@
 package servlet;
 
-import dao.DishDAO;
-import model.Dish;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -10,18 +7,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.List;
 
-@WebServlet("/manager/dishes")
-public class ManagerDishesServlet extends HttpServlet {
-
-    private DishDAO dishDAO;
-
-    @Override
-    public void init() throws ServletException {
-        super.init();
-        dishDAO = new DishDAO();
-    }
+@WebServlet("/manager/menu")
+public class ManagerMenuServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -40,18 +28,7 @@ public class ManagerDishesServlet extends HttpServlet {
             return;
         }
 
-        // Lấy danh sách món ăn từ database
-        List<Dish> dishes = dishDAO.findAll();
-        request.setAttribute("dishes", dishes);
-
-        // Lấy thông báo success từ session (nếu có)
-        String successMessage = (String) session.getAttribute("dishSuccess");
-        if (successMessage != null) {
-            request.setAttribute("success", successMessage);
-            session.removeAttribute("dishSuccess"); // Xóa sau khi hiển thị
-        }
-
-        // Hiển thị trang quản lý món ăn
-        request.getRequestDispatcher("/WEB-INF/manager/IManageDish.jsp").forward(request, response);
+        // Hiển thị trang menu manager
+        request.getRequestDispatcher("/WEB-INF/manager/IMenu.jsp").forward(request, response);
     }
 }

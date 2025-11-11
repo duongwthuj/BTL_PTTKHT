@@ -25,16 +25,27 @@ public class CreateReservationServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // Kiểm tra đăng nhập
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
+        
+        // Kiểm tra xem có phải khách vãng lai không
+        String isGuest = request.getParameter("guest");
+        boolean guestMode = "true".equals(isGuest);
+        
+        int userId = 0;
+        
+        if (!guestMode) {
+            // Mode customer - cần đăng nhập
+            if (session == null || session.getAttribute("userId") == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+            userId = (Integer) session.getAttribute("userId");
         }
         
         try {
-            int userId = (Integer) session.getAttribute("userId");
-            
             // Lấy dữ liệu từ form
             int tableId = Integer.parseInt(request.getParameter("tableId"));
             String customerName = request.getParameter("customerName");
@@ -43,6 +54,35 @@ public class CreateReservationServlet extends HttpServlet {
             String reservationTime = request.getParameter("reservationTime");
             int numberOfGuests = Integer.parseInt(request.getParameter("numberOfGuests"));
             String note = request.getParameter("note");
+            
+            // Nếu là guest, tạo/lấy user guest
+            if (guestMode) {
+                // Kiểm tra xem số điện thoại đã tồn tại chưa
+                User guestUser = userDAO.findByUsername("guest_" + customerPhone.trim());
+                
+                if (guestUser == null) {
+                    // Chưa có -> Tạo user mới với role='guest'
+                    guestUser = new User(
+                        "guest_" + customerPhone.trim(),
+                        "guest123",
+                        customerName.trim(),
+                        null,
+                        customerPhone.trim(),
+                        "guest"
+                    );
+                    
+                    boolean userCreated = userDAO.insert(guestUser);
+                    if (!userCreated) {
+                        request.setAttribute("error", "Không thể tạo thông tin khách!");
+                        request.setAttribute("isGuest", true);
+                        request.getRequestDispatcher("/WEB-INF/customer/ISelectAvailbleTable.jsp").forward(request, response);
+                        return;
+                    }
+                    System.out.println("✅ Created new guest user: " + guestUser.getId());
+                }
+                userId = guestUser.getId();
+                request.setAttribute("isGuest", true);
+            }
             
             // Tạo Reservation object
             Reservation reservation = new Reservation();
@@ -60,24 +100,29 @@ public class CreateReservationServlet extends HttpServlet {
             boolean success = reservationDAO.insert(reservation);
             
             if (success) {
-                // Truyền thông tin đặt bàn thành công
                 request.setAttribute("success", true);
                 request.setAttribute("reservation", reservation);
                 request.setAttribute("tableId", tableId);
+                System.out.println("✅ Reservation created successfully!");
             } else {
                 request.setAttribute("error", "Có lỗi xảy ra. Vui lòng thử lại!");
             }
             
-            // Lấy thông tin user để hiển thị
-            String username = (String) session.getAttribute("username");
-            User user = userDAO.findByUsername(username);
-            if (user != null) {
-                request.setAttribute("user", user);
+            // Lấy thông tin user để hiển thị (nếu không phải guest)
+            if (!guestMode && session != null) {
+                String username = (String) session.getAttribute("username");
+                User user = userDAO.findByUsername(username);
+                if (user != null) {
+                    request.setAttribute("user", user);
+                }
             }
             
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
+            if (guestMode) {
+                request.setAttribute("isGuest", true);
+            }
         }
         
         // Forward về trang đặt bàn với kết quả
